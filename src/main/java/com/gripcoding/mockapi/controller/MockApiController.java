@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +34,20 @@ public class MockApiController {
 
     // Handle all incoming GET requests
     @GetMapping(value = "/**")
-    public ResponseEntity getDummyApiResponse(HttpServletRequest request,
+    public ResponseEntity getDummyGetApiResponse(HttpServletRequest request,
                                               @RequestParam Map<String, String> queryParams) {
+        return getResponseEntity(request, queryParams);
+    }
+
+    // Handle all incoming POST requests
+    @PostMapping(value = "/**")
+    public ResponseEntity getDummyPostApiResponse(HttpServletRequest request,
+                                                  @RequestParam Map<String, String> queryParams,
+                                                  @RequestBody Object requestBody) {
+        return getResponseEntity(request, queryParams);
+    }
+
+    private ResponseEntity<?> getResponseEntity(HttpServletRequest request, Map<String, String> queryParams) {
         String requestUri = request.getRequestURI();
 
         return service.getEndpointConfig(requestUri)
@@ -53,7 +63,7 @@ public class MockApiController {
                     } catch (Exception e) {
                         return ResponseEntity.internalServerError()
                                 .headers(headers)
-                                .body("{\"error\": \"Unable to read json file due to "+e.getMessage()+"\"}");
+                                .body("{\"error\": \"Unable to read json file due to " + e.getMessage() + "\"}");
                     }
                 })
                 .orElse(ResponseEntity.status(404).body("{\"error\": \"No matching path\"}"));
